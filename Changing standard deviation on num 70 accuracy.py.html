@@ -1,0 +1,90 @@
+<html>
+<head>
+<title>Changing standard deviation on num 70 accuracy.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #2aacb8;}
+.s5 { color: #6aab73;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Changing standard deviation on num 70 accuracy.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+<span class="s0">import </span><span class="s1">matplotlib</span><span class="s2">.</span><span class="s1">pyplot </span><span class="s0">as </span><span class="s1">plt</span>
+
+<span class="s3"># Constants</span>
+<span class="s1">g </span><span class="s2">= </span><span class="s4">9.81</span>
+<span class="s1">m </span><span class="s2">= </span><span class="s4">0.028  </span><span class="s3"># Mass of the arrow (kg)</span>
+<span class="s1">hp </span><span class="s2">= </span><span class="s4">1.77  </span><span class="s3"># Height of person (m)</span>
+<span class="s1">d </span><span class="s2">= </span><span class="s4">28  </span><span class="s3"># Distance (m)</span>
+<span class="s1">ht </span><span class="s2">= </span><span class="s4">1</span><span class="s2">/</span><span class="s4">8 </span><span class="s2">* </span><span class="s1">hp  </span><span class="s3"># Height of the target center -&gt; ground (m)</span>
+<span class="s1">r </span><span class="s2">= </span><span class="s4">0.18  </span><span class="s3"># Radius of target (m)</span>
+<span class="s1">k </span><span class="s2">= </span><span class="s4">125.8  </span><span class="s3"># Spring constant (N/m)</span>
+
+<span class="s3"># Mean values for parameters</span>
+<span class="s1">mean_hd </span><span class="s2">= </span><span class="s4">7.25 </span><span class="s2">/ </span><span class="s4">8 </span><span class="s2">* </span><span class="s1">hp</span>
+<span class="s1">mean_x </span><span class="s2">= </span><span class="s4">0.8</span>
+<span class="s1">mean_theta </span><span class="s2">= </span><span class="s4">0</span>
+
+<span class="s3"># Standard deviation ranges</span>
+<span class="s1">theta_std_range </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">linspace</span><span class="s2">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0.01</span><span class="s2">, </span><span class="s4">100</span><span class="s2">)</span>
+<span class="s1">x_std_range </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">linspace</span><span class="s2">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0.01</span><span class="s2">, </span><span class="s4">100</span><span class="s2">)</span>
+<span class="s1">hd_std_range </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">linspace</span><span class="s2">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">0.01</span><span class="s2">, </span><span class="s4">100</span><span class="s2">)</span>
+
+<span class="s3"># Number of simulations</span>
+<span class="s1">simulations </span><span class="s2">= </span><span class="s4">1000</span>
+
+
+<span class="s0">def </span><span class="s1">calculate_alpha</span><span class="s2">(</span><span class="s1">d</span><span class="s2">, </span><span class="s1">k</span><span class="s2">, </span><span class="s1">x</span><span class="s2">, </span><span class="s1">m</span><span class="s2">, </span><span class="s1">hd</span><span class="s2">, </span><span class="s1">theta</span><span class="s2">, </span><span class="s1">ht</span><span class="s2">, </span><span class="s1">r</span><span class="s2">, </span><span class="s1">g</span><span class="s2">=</span><span class="s4">9.81</span><span class="s2">):</span>
+    <span class="s1">ha </span><span class="s2">= </span><span class="s1">hd </span><span class="s2">+ </span><span class="s1">d </span><span class="s2">* </span><span class="s1">np</span><span class="s2">.</span><span class="s1">tan</span><span class="s2">(</span><span class="s1">theta</span><span class="s2">) - (</span><span class="s4">1</span><span class="s2">/</span><span class="s4">2 </span><span class="s2">* </span><span class="s1">g </span><span class="s2">* ((</span><span class="s1">d </span><span class="s2">** </span><span class="s4">2 </span><span class="s2">* </span><span class="s1">m</span><span class="s2">) / (</span><span class="s1">x </span><span class="s2">** </span><span class="s4">2 </span><span class="s2">* </span><span class="s1">k </span><span class="s2">* </span><span class="s1">np</span><span class="s2">.</span><span class="s1">cos</span><span class="s2">(</span><span class="s1">theta</span><span class="s2">) ** </span><span class="s4">2</span><span class="s2">)))</span>
+    <span class="s1">beta </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">abs</span><span class="s2">(</span><span class="s1">ha </span><span class="s2">- </span><span class="s1">ht</span><span class="s2">)</span>
+    <span class="s1">alpha </span><span class="s2">= (</span><span class="s4">1 </span><span class="s2">- </span><span class="s1">beta </span><span class="s2">/ </span><span class="s1">r</span><span class="s2">) * </span><span class="s4">100</span>
+    <span class="s0">return </span><span class="s1">alpha</span>
+
+
+<span class="s3"># Function to simulate and calculate percentage of alphas &gt; 80%</span>
+<span class="s0">def </span><span class="s1">calculate_percentage</span><span class="s2">(</span><span class="s1">param_std</span><span class="s2">, </span><span class="s1">mean_param</span><span class="s2">, </span><span class="s1">param_name</span><span class="s2">):</span>
+    <span class="s1">percentages </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">std </span><span class="s0">in </span><span class="s1">param_std</span><span class="s2">:</span>
+        <span class="s1">high_alpha_count </span><span class="s2">= </span><span class="s4">0</span>
+        <span class="s0">for </span><span class="s1">_ </span><span class="s0">in </span><span class="s1">range</span><span class="s2">(</span><span class="s1">simulations</span><span class="s2">):</span>
+            <span class="s1">hd </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s1">mean_hd</span><span class="s2">, </span><span class="s1">std </span><span class="s0">if </span><span class="s1">param_name </span><span class="s2">== </span><span class="s5">'hd' </span><span class="s0">else </span><span class="s4">0</span><span class="s2">)</span>
+            <span class="s1">x </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s1">mean_x</span><span class="s2">, </span><span class="s1">std </span><span class="s0">if </span><span class="s1">param_name </span><span class="s2">== </span><span class="s5">'x' </span><span class="s0">else </span><span class="s4">0</span><span class="s2">)</span>
+            <span class="s1">theta </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s1">mean_theta</span><span class="s2">, </span><span class="s1">std </span><span class="s0">if </span><span class="s1">param_name </span><span class="s2">== </span><span class="s5">'theta' </span><span class="s0">else </span><span class="s4">0</span><span class="s2">)</span>
+            <span class="s1">alpha </span><span class="s2">= </span><span class="s1">calculate_alpha</span><span class="s2">(</span><span class="s1">d</span><span class="s2">, </span><span class="s1">k</span><span class="s2">, </span><span class="s1">x</span><span class="s2">, </span><span class="s1">m</span><span class="s2">, </span><span class="s1">hd</span><span class="s2">, </span><span class="s1">theta</span><span class="s2">, </span><span class="s1">ht</span><span class="s2">, </span><span class="s1">r</span><span class="s2">)</span>
+            <span class="s0">if </span><span class="s1">alpha </span><span class="s2">&gt; </span><span class="s4">70</span><span class="s2">:</span>
+                <span class="s1">high_alpha_count </span><span class="s2">+= </span><span class="s4">1</span>
+        <span class="s1">percentages</span><span class="s2">.</span><span class="s1">append</span><span class="s2">((</span><span class="s1">high_alpha_count </span><span class="s2">/ </span><span class="s1">simulations</span><span class="s2">) * </span><span class="s4">100</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s1">percentages</span>
+
+
+<span class="s3"># Calculate percentages</span>
+<span class="s1">theta_percentages </span><span class="s2">= </span><span class="s1">calculate_percentage</span><span class="s2">(</span><span class="s1">theta_std_range</span><span class="s2">, </span><span class="s1">mean_theta</span><span class="s2">, </span><span class="s5">'theta'</span><span class="s2">)</span>
+<span class="s1">x_percentages </span><span class="s2">= </span><span class="s1">calculate_percentage</span><span class="s2">(</span><span class="s1">x_std_range</span><span class="s2">, </span><span class="s1">mean_x</span><span class="s2">, </span><span class="s5">'x'</span><span class="s2">)</span>
+<span class="s1">hd_percentages </span><span class="s2">= </span><span class="s1">calculate_percentage</span><span class="s2">(</span><span class="s1">hd_std_range</span><span class="s2">, </span><span class="s1">mean_hd</span><span class="s2">, </span><span class="s5">'hd'</span><span class="s2">)</span>
+
+<span class="s3"># Plotting</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">figure</span><span class="s2">(</span><span class="s1">figsize</span><span class="s2">=(</span><span class="s4">7</span><span class="s2">, </span><span class="s4">5</span><span class="s2">))</span>
+
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">plot</span><span class="s2">(</span><span class="s1">theta_std_range</span><span class="s2">, </span><span class="s1">theta_percentages</span><span class="s2">, </span><span class="s1">label</span><span class="s2">=</span><span class="s5">'Draw angle (theta)'</span><span class="s2">)</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">plot</span><span class="s2">(</span><span class="s1">x_std_range</span><span class="s2">, </span><span class="s1">x_percentages</span><span class="s2">, </span><span class="s1">label</span><span class="s2">=</span><span class="s5">'Extension (x)'</span><span class="s2">, </span><span class="s1">color</span><span class="s2">=</span><span class="s5">'orange'</span><span class="s2">)</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">plot</span><span class="s2">(</span><span class="s1">hd_std_range</span><span class="s2">, </span><span class="s1">hd_percentages</span><span class="s2">, </span><span class="s1">label</span><span class="s2">=</span><span class="s5">'Draw height (hd)'</span><span class="s2">, </span><span class="s1">color</span><span class="s2">=</span><span class="s5">'green'</span><span class="s2">)</span>
+
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">xlabel</span><span class="s2">(</span><span class="s5">r'$\sigma$'</span><span class="s2">, </span><span class="s1">fontsize</span><span class="s2">=</span><span class="s4">25</span><span class="s2">)</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">ylabel</span><span class="s2">(</span><span class="s5">'Percentage of Accuracy &gt; 70%'</span><span class="s2">, </span><span class="s1">fontsize</span><span class="s2">=</span><span class="s4">25</span><span class="s2">)</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">legend</span><span class="s2">(</span><span class="s1">fontsize</span><span class="s2">=</span><span class="s4">20</span><span class="s2">)</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">tick_params</span><span class="s2">(</span><span class="s1">axis</span><span class="s2">=</span><span class="s5">'both'</span><span class="s2">, </span><span class="s1">which</span><span class="s2">=</span><span class="s5">'major'</span><span class="s2">, </span><span class="s1">labelsize</span><span class="s2">=</span><span class="s4">15</span><span class="s2">)</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">grid</span><span class="s2">(</span><span class="s0">True</span><span class="s2">)</span>
+
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">tight_layout</span><span class="s2">()</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">show</span><span class="s2">()</span></pre>
+</body>
+</html>

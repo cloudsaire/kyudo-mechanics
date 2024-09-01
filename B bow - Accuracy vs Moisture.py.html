@@ -1,0 +1,123 @@
+<html>
+<head>
+<title>B bow - Accuracy vs Moisture.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #2aacb8;}
+.s5 { color: #6aab73;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+B bow - Accuracy vs Moisture.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">math</span>
+<span class="s0">import </span><span class="s1">matplotlib</span><span class="s2">.</span><span class="s1">pyplot </span><span class="s0">as </span><span class="s1">plt</span>
+<span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+
+<span class="s3"># Constants</span>
+<span class="s1">g </span><span class="s2">= </span><span class="s4">9.81</span>
+<span class="s1">m </span><span class="s2">= </span><span class="s4">0.028  </span><span class="s3"># Mass of the arrow (kg)</span>
+<span class="s1">hp </span><span class="s2">= </span><span class="s4">1.77  </span><span class="s3"># Height of person (m)</span>
+<span class="s1">d </span><span class="s2">= </span><span class="s4">28  </span><span class="s3"># Distance (m)</span>
+<span class="s1">r </span><span class="s2">= </span><span class="s4">0.18  </span><span class="s3"># Radius of target (m)</span>
+<span class="s1">ht </span><span class="s2">= </span><span class="s4">1 </span><span class="s2">/ </span><span class="s4">8 </span><span class="s2">* </span><span class="s1">hp  </span><span class="s3"># Height of the target center -&gt; ground (m)</span>
+<span class="s1">theta </span><span class="s2">= </span><span class="s4">0  </span><span class="s3"># Angle of the arrow (radians)</span>
+<span class="s1">w </span><span class="s2">= </span><span class="s4">0.02  </span><span class="s3"># Width of cross-sectional area (m)</span>
+<span class="s1">t </span><span class="s2">= </span><span class="s4">0.01  </span><span class="s3"># Thickness of cross-sectional area (m)</span>
+<span class="s1">L </span><span class="s2">= </span><span class="s4">2.2  </span><span class="s3"># Length of the bow (m)</span>
+<span class="s1">i </span><span class="s2">= (</span><span class="s4">1 </span><span class="s2">/ </span><span class="s4">12</span><span class="s2">) * </span><span class="s1">w </span><span class="s2">* </span><span class="s1">t </span><span class="s2">** </span><span class="s4">3  </span><span class="s3"># Area moment of inertia</span>
+
+<span class="s3"># Calculate spring constants</span>
+<span class="s1">k0_bamboo </span><span class="s2">= (</span><span class="s4">15.462 </span><span class="s2">* </span><span class="s4">10 </span><span class="s2">** </span><span class="s4">9 </span><span class="s2">* </span><span class="s4">48 </span><span class="s2">* </span><span class="s1">i</span><span class="s2">) / </span><span class="s1">L </span><span class="s2">** </span><span class="s4">3  </span><span class="s3"># Base spring constant (N/m)</span>
+<span class="s1">mck_bamboo </span><span class="s2">= (</span><span class="s4">0.045 </span><span class="s2">* </span><span class="s4">10 </span><span class="s2">** </span><span class="s4">9 </span><span class="s2">* </span><span class="s4">48 </span><span class="s2">* </span><span class="s1">i</span><span class="s2">) / </span><span class="s1">L </span><span class="s2">** </span><span class="s4">3  </span><span class="s3"># Change in spring constant per unit moisture content</span>
+
+<span class="s3"># Base values</span>
+<span class="s1">x_base </span><span class="s2">= </span><span class="s4">0.8  </span><span class="s3"># Draw length/extension (m)</span>
+<span class="s1">hd_base </span><span class="s2">= </span><span class="s4">7.25 </span><span class="s2">/ </span><span class="s4">8 </span><span class="s2">* </span><span class="s1">hp  </span><span class="s3"># Draw height (m)</span>
+
+<span class="s3"># Scales for variability</span>
+<span class="s1">scale_theta_expert </span><span class="s2">= </span><span class="s4">0.0001</span>
+<span class="s1">scale_theta_novice </span><span class="s2">= </span><span class="s4">0.001</span>
+<span class="s1">scale_x_expert </span><span class="s2">= </span><span class="s4">0.001</span>
+<span class="s1">scale_x_novice </span><span class="s2">= </span><span class="s4">0.01</span>
+<span class="s1">scale_hd_expert </span><span class="s2">= </span><span class="s4">0.001</span>
+<span class="s1">scale_hd_novice </span><span class="s2">= </span><span class="s4">0.01</span>
+
+<span class="s1">adjustment_expert </span><span class="s2">= </span><span class="s4">1</span>
+<span class="s1">adjustment_novice </span><span class="s2">= </span><span class="s4">1</span>
+
+<span class="s3"># Moisture content</span>
+<span class="s1">moisture_content </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">linspace</span><span class="s2">(</span><span class="s4">6</span><span class="s2">, </span><span class="s4">15</span><span class="s2">, </span><span class="s4">100</span><span class="s2">)  </span><span class="s3"># Moisture content range (%)</span>
+
+
+<span class="s0">def </span><span class="s1">calculate_alpha</span><span class="s2">(</span><span class="s1">d</span><span class="s2">, </span><span class="s1">k</span><span class="s2">, </span><span class="s1">x</span><span class="s2">, </span><span class="s1">m</span><span class="s2">, </span><span class="s1">hd</span><span class="s2">, </span><span class="s1">theta</span><span class="s2">, </span><span class="s1">ht</span><span class="s2">, </span><span class="s1">g</span><span class="s2">=</span><span class="s4">9.81</span><span class="s2">):</span>
+    <span class="s1">ha </span><span class="s2">= </span><span class="s1">hd </span><span class="s2">+ </span><span class="s1">d </span><span class="s2">* </span><span class="s1">np</span><span class="s2">.</span><span class="s1">tan</span><span class="s2">(</span><span class="s1">theta</span><span class="s2">) - (</span><span class="s4">1 </span><span class="s2">/ </span><span class="s4">2 </span><span class="s2">* </span><span class="s1">g </span><span class="s2">* ((</span><span class="s1">d </span><span class="s2">** </span><span class="s4">2 </span><span class="s2">* </span><span class="s1">m</span><span class="s2">) / (</span><span class="s1">x </span><span class="s2">** </span><span class="s4">2 </span><span class="s2">* </span><span class="s1">k </span><span class="s2">* </span><span class="s1">np</span><span class="s2">.</span><span class="s1">cos</span><span class="s2">(</span><span class="s1">theta</span><span class="s2">) ** </span><span class="s4">2</span><span class="s2">)))</span>
+    <span class="s1">beta </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">abs</span><span class="s2">(</span><span class="s1">ha </span><span class="s2">- </span><span class="s1">ht</span><span class="s2">)</span>
+
+    <span class="s1">alpha </span><span class="s2">= (</span><span class="s4">1 </span><span class="s2">- </span><span class="s1">beta </span><span class="s2">/ </span><span class="s1">r</span><span class="s2">) * </span><span class="s4">100</span>
+    <span class="s0">return </span><span class="s1">alpha</span>
+
+
+<span class="s3"># Calculate required draw length to hit bullseye for each moisture content</span>
+<span class="s1">required_draw_lengths_bamboo </span><span class="s2">= []</span>
+<span class="s0">for </span><span class="s1">mc </span><span class="s0">in </span><span class="s1">moisture_content</span><span class="s2">:</span>
+    <span class="s1">k_bamboo </span><span class="s2">= </span><span class="s1">k0_bamboo </span><span class="s2">+ </span><span class="s1">mck_bamboo </span><span class="s2">* </span><span class="s1">mc</span>
+    <span class="s1">x_calculated_bamboo </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">sqrt</span><span class="s2">((</span><span class="s4">1 </span><span class="s2">/ </span><span class="s4">2 </span><span class="s2">* </span><span class="s1">g </span><span class="s2">* (</span><span class="s1">d </span><span class="s2">** </span><span class="s4">2 </span><span class="s2">* </span><span class="s1">m</span><span class="s2">) / (</span><span class="s1">k_bamboo </span><span class="s2">* </span><span class="s1">np</span><span class="s2">.</span><span class="s1">cos</span><span class="s2">(</span><span class="s1">theta</span><span class="s2">) ** </span><span class="s4">2</span><span class="s2">)) / (</span><span class="s1">hd_base </span><span class="s2">+ </span><span class="s1">d </span><span class="s2">* </span><span class="s1">np</span><span class="s2">.</span><span class="s1">tan</span><span class="s2">(</span><span class="s1">theta</span><span class="s2">) - </span><span class="s1">ht</span><span class="s2">))</span>
+    <span class="s1">x_required_bamboo_expert </span><span class="s2">= (</span><span class="s1">x_calculated_bamboo </span><span class="s2">- </span><span class="s1">x_base</span><span class="s2">) / </span><span class="s1">adjustment_expert </span><span class="s2">+ </span><span class="s1">x_base</span>
+    <span class="s1">required_draw_lengths_bamboo</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">x_required_bamboo_expert</span><span class="s2">)</span>
+<span class="s1">required_draw_lengths_bamboo </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">array</span><span class="s2">(</span><span class="s1">required_draw_lengths_bamboo</span><span class="s2">)</span>
+
+<span class="s3"># Adjust novice draw length to hit target at M = 8%</span>
+<span class="s1">x_base_novice_bamboo </span><span class="s2">= </span><span class="s1">required_draw_lengths_bamboo</span><span class="s2">[</span><span class="s1">np</span><span class="s2">.</span><span class="s1">argmin</span><span class="s2">(</span><span class="s1">np</span><span class="s2">.</span><span class="s1">abs</span><span class="s2">(</span><span class="s1">moisture_content </span><span class="s2">- </span><span class="s4">8</span><span class="s2">))]</span>
+<span class="s1">x_required_bamboo_novice </span><span class="s2">= (</span><span class="s1">x_base_novice_bamboo </span><span class="s2">- </span><span class="s1">x_base</span><span class="s2">) / </span><span class="s1">adjustment_novice </span><span class="s2">+ </span><span class="s1">x_base</span>
+
+<span class="s3"># Simulate novice and expert for bamboo bow</span>
+<span class="s1">x_novice_bamboo </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s1">x_required_bamboo_novice</span><span class="s2">, </span><span class="s1">scale_x_novice</span><span class="s2">, </span><span class="s1">len</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">))</span>
+<span class="s1">x_expert_bamboo </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s1">required_draw_lengths_bamboo</span><span class="s2">, </span><span class="s1">scale_x_expert</span><span class="s2">)</span>
+
+<span class="s3"># Calculate accuracy, alpha, values for novice and expert</span>
+<span class="s1">alpha_novice_bamboo </span><span class="s2">= [</span>
+    <span class="s1">calculate_alpha</span><span class="s2">(</span><span class="s1">d</span><span class="s2">, </span><span class="s1">k0_bamboo </span><span class="s2">+ </span><span class="s1">mck_bamboo </span><span class="s2">* </span><span class="s1">mc</span><span class="s2">, </span><span class="s1">x</span><span class="s2">, </span><span class="s1">m</span><span class="s2">, </span><span class="s1">hd_base </span><span class="s2">+ </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s4">0</span><span class="s2">, </span><span class="s1">scale_hd_novice</span><span class="s2">), </span><span class="s1">theta </span><span class="s2">+ </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s4">0</span><span class="s2">, </span><span class="s1">scale_theta_novice</span><span class="s2">), </span><span class="s1">ht</span><span class="s2">)</span>
+    <span class="s0">for </span><span class="s1">x</span><span class="s2">, </span><span class="s1">mc </span><span class="s0">in </span><span class="s1">zip</span><span class="s2">(</span><span class="s1">x_novice_bamboo</span><span class="s2">, </span><span class="s1">moisture_content</span><span class="s2">)</span>
+<span class="s2">]</span>
+<span class="s1">alpha_expert_bamboo </span><span class="s2">= [</span>
+    <span class="s1">calculate_alpha</span><span class="s2">(</span><span class="s1">d</span><span class="s2">, </span><span class="s1">k0_bamboo </span><span class="s2">+ </span><span class="s1">mck_bamboo </span><span class="s2">* </span><span class="s1">mc</span><span class="s2">, </span><span class="s1">x</span><span class="s2">, </span><span class="s1">m</span><span class="s2">, </span><span class="s1">hd_base </span><span class="s2">+ </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s4">0</span><span class="s2">, </span><span class="s1">scale_hd_expert</span><span class="s2">), </span><span class="s1">theta </span><span class="s2">+ </span><span class="s1">np</span><span class="s2">.</span><span class="s1">random</span><span class="s2">.</span><span class="s1">normal</span><span class="s2">(</span><span class="s4">0</span><span class="s2">, </span><span class="s1">scale_theta_expert</span><span class="s2">), </span><span class="s1">ht</span><span class="s2">)</span>
+    <span class="s0">for </span><span class="s1">x</span><span class="s2">, </span><span class="s1">mc </span><span class="s0">in </span><span class="s1">zip</span><span class="s2">(</span><span class="s1">x_expert_bamboo</span><span class="s2">, </span><span class="s1">moisture_content</span><span class="s2">)</span>
+<span class="s2">]</span>
+
+<span class="s3"># Fit trend lines</span>
+<span class="s1">z_novice </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">polyfit</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">, </span><span class="s1">alpha_novice_bamboo</span><span class="s2">, </span><span class="s4">1</span><span class="s2">)</span>
+<span class="s1">p_novice </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">poly1d</span><span class="s2">(</span><span class="s1">z_novice</span><span class="s2">)</span>
+
+<span class="s1">z_expert </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">polyfit</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">, </span><span class="s1">alpha_expert_bamboo</span><span class="s2">, </span><span class="s4">1</span><span class="s2">)</span>
+<span class="s1">p_expert </span><span class="s2">= </span><span class="s1">np</span><span class="s2">.</span><span class="s1">poly1d</span><span class="s2">(</span><span class="s1">z_expert</span><span class="s2">)</span>
+
+<span class="s3"># Plotting line graph</span>
+<span class="s1">fig</span><span class="s2">, </span><span class="s1">ax </span><span class="s2">= </span><span class="s1">plt</span><span class="s2">.</span><span class="s1">subplots</span><span class="s2">()</span>
+
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">scatter</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">, </span><span class="s1">alpha_novice_bamboo</span><span class="s2">, </span><span class="s1">label</span><span class="s2">=</span><span class="s5">'Novice'</span><span class="s2">, </span><span class="s1">alpha</span><span class="s2">=</span><span class="s4">0.5</span><span class="s2">)</span>
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">plot</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">, </span><span class="s1">p_novice</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">), </span><span class="s1">color</span><span class="s2">=</span><span class="s5">'blue'</span><span class="s2">, </span><span class="s1">linestyle</span><span class="s2">=</span><span class="s5">'--'</span><span class="s2">, </span><span class="s1">label</span><span class="s2">=</span><span class="s5">'Novice Trend'</span><span class="s2">)</span>
+
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">scatter</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">, </span><span class="s1">alpha_expert_bamboo</span><span class="s2">, </span><span class="s1">label</span><span class="s2">=</span><span class="s5">'Expert'</span><span class="s2">, </span><span class="s1">alpha</span><span class="s2">=</span><span class="s4">0.5</span><span class="s2">)</span>
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">plot</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">, </span><span class="s1">p_expert</span><span class="s2">(</span><span class="s1">moisture_content</span><span class="s2">), </span><span class="s1">color</span><span class="s2">=</span><span class="s5">'orange'</span><span class="s2">, </span><span class="s1">linestyle</span><span class="s2">=</span><span class="s5">'--'</span><span class="s2">, </span><span class="s1">label</span><span class="s2">=</span><span class="s5">'Expert Trend'</span><span class="s2">)</span>
+
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">set_xlabel</span><span class="s2">(</span><span class="s5">'Moisture content (%)'</span><span class="s2">, </span><span class="s1">fontsize</span><span class="s2">=</span><span class="s4">25</span><span class="s2">)</span>
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">set_ylabel</span><span class="s2">(</span><span class="s5">'Arrow accuracy (%)'</span><span class="s2">, </span><span class="s1">fontsize</span><span class="s2">=</span><span class="s4">25</span><span class="s2">)</span>
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">set_title</span><span class="s2">(</span><span class="s5">'Bamboo bow'</span><span class="s2">, </span><span class="s1">fontsize</span><span class="s2">=</span><span class="s4">25</span><span class="s2">)</span>
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">set_ylim</span><span class="s2">(</span><span class="s4">0</span><span class="s2">, </span><span class="s4">100</span><span class="s2">)  </span><span class="s3"># Adjust y-axis to focus on differences</span>
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">legend</span><span class="s2">(</span><span class="s1">fontsize</span><span class="s2">=</span><span class="s4">20</span><span class="s2">)</span>
+<span class="s1">ax</span><span class="s2">.</span><span class="s1">tick_params</span><span class="s2">(</span><span class="s1">axis</span><span class="s2">=</span><span class="s5">'both'</span><span class="s2">, </span><span class="s1">which</span><span class="s2">=</span><span class="s5">'major'</span><span class="s2">, </span><span class="s1">labelsize</span><span class="s2">=</span><span class="s4">20</span><span class="s2">)</span>
+<span class="s1">plt</span><span class="s2">.</span><span class="s1">show</span><span class="s2">()</span>
+
+
+<span class="s3"># Test</span>
+<span class="s1">print</span><span class="s2">(</span><span class="s1">required_draw_lengths</span><span class="s2">)</span></pre>
+</body>
+</html>
